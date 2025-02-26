@@ -161,6 +161,7 @@ export class HeliusDasProvider implements TokenDataProvider {
         };
     }
 
+    // TODO: fix
     /**
      * Get SOL balance for a wallet
      * @private

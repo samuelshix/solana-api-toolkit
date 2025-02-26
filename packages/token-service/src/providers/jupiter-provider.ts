@@ -23,16 +23,20 @@ class JupiterClient extends HttpClient {
      * Get token price from Jupiter
      */
     async getPrice(mint: string): Promise<any> {
-        return this.get<any>(`/price?ids=${mint}`);
+        if (this.config.apiKey) {
+            return this.get<any>(`/price?ids=${mint}`, undefined, {
+                'x-api-key': this.config.apiKey
+            });
+        } else {
+            return this.get<any>(`/price?ids=${mint}`);
+        }
     }
 
     /**
      * Get token metadata from Jupiter
      */
     async getTokenInfo(mint: string): Promise<any> {
-        // Jupiter doesn't have a dedicated token info endpoint
-        // This is a placeholder - in a real implementation, you might use a different endpoint
-        throw new Error('Token metadata not available from Jupiter provider');
+        return this.get<any>(`/tokens/v1/token/${mint}`);
     }
 }
 
@@ -76,16 +80,20 @@ export class JupiterProvider implements TokenDataProvider {
 
     /**
      * Get token metadata from Jupiter
-     * Note: Jupiter doesn't provide comprehensive token metadata
-     * This is a placeholder that would need to be implemented with the appropriate endpoint
      */
     async getTokenMetadata(mint: string): Promise<TokenInfo> {
         if (!isValidSolanaAddress(mint)) {
             throw new ValidationError('Invalid token mint address', 'mint');
         }
 
-        // This is a placeholder - in reality, you'd implement this using the appropriate Jupiter endpoint
-        // For now, we'll throw an error to indicate this isn't implemented
-        throw new Error('Token metadata not available from Jupiter provider');
+        const response = await this.client.getTokenInfo(mint);
+
+        return {
+            mint,
+            symbol: response.symbol,
+            decimals: response.decimals,
+            name: response.name,
+            logoUrl: response.logo_url
+        };
     }
 } 

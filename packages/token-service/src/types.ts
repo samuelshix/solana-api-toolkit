@@ -9,6 +9,7 @@ export interface ProviderConfig {
     timeout?: number;
     maxRetries?: number;
     priority?: number;
+    cacheTtl?: number;
 }
 
 /**

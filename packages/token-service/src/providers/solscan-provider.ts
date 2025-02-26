@@ -5,7 +5,7 @@ import {
     isValidSolanaAddress
 } from '@solana-api-toolkit/core';
 import { TokenDataProvider, ProviderConfig, TokenPrice } from '../types';
-
+// TODO: validate and fix
 /**
  * Solscan API client
  */
