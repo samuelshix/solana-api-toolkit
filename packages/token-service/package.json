@@ -1,0 +1,32 @@
+{
+    "name": "@solana-api-toolkit/token-service",
+    "version": "0.1.0",
+    "description": "Token data service with multiple provider support for Solana API Toolkit",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "jest",
+        "lint": "eslint src --ext .ts",
+        "clean": "rimraf dist"
+    },
+    "keywords": [
+        "solana",
+        "token",
+        "price",
+        "api",
+        "client"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@pythnetwork/client": "^2.14.0",
+        "@solana-api-toolkit/core": "file:../core",
+        "@solana-api-toolkit/helius": "^0.1.0",
+        "@solana/web3.js": "^1.73.0",
+        "helius-sdk": "^1.4.2"
+    },
+    "devDependencies": {
+        "rimraf": "^4.1.2"
+    }
+}
