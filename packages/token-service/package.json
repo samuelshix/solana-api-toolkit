@@ -46,10 +46,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/yourusername/solana-api-toolkit.git"
+        "url": "https://github.com/samuelshix/solana-api-toolkit.git"
     },
     "bugs": {
-        "url": "https://github.com/yourusername/solana-api-toolkit/issues"
+        "url": "https://github.com/samuelshix/solana-api-toolkit/issues"
     },
-    "homepage": "https://github.com/yourusername/solana-api-toolkit#readme"
+    "homepage": "https://github.com/samuelshix/solana-api-toolkit#readme"
 }

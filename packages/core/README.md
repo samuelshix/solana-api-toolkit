@@ -2,6 +2,9 @@
 
 Core utilities, interfaces, and shared functionality for the Solana API Toolkit ecosystem.
 
+[![npm version](https://img.shields.io/npm/v/@solana-api-toolkit/core.svg)](https://www.npmjs.com/package/@solana-api-toolkit/core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Features
 
 - 🔄 **HTTP Client**: Robust HTTP client with retry logic, circuit breaker, and standardized error handling

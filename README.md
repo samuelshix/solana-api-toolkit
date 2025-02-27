@@ -14,18 +14,20 @@ A comprehensive toolkit for interacting with Solana ecosystem APIs, providing st
 
 | Package | Description |
 |---------|-------------|
-| `@solana-api-toolkit/helius-client` | Client for Helius API (token balances, NFTs) |
-| `@solana-api-toolkit/birdeye-client` | Client for Birdeye API (token prices, market data) |
-| `@solana-api-toolkit/jupiter-client` | Client for Jupiter API (token metadata, swap quotes) |
 | `@solana-api-toolkit/token-data-service` | Combined service for token data from multiple sources |
 | `@solana-api-toolkit/core` | Shared utilities and types |
 
+## Included API clients (api keys not included)
+- Helius DAS API
+- Birdeye
+- Jupiter
+- Coingecko
+
 ## Installation
-
-
-## TODO:
-- add coingecko support for token prices (including mapping token CA to coingecko ID)
-
+```bash
+npm install @solana-api-toolkit/core
+npm install @solana-api-toolkit/token-data-service
+```
 
 ## Development
 For local development before publishing, use npm link:
@@ -40,3 +42,6 @@ npm link
 ```bash
 npm link @solana-api-toolkit/core
 ```
+
+## TODO:
+- add coingecko support for token prices (including mapping token CA to coingecko ID)
