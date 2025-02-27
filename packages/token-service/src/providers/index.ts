@@ -1,4 +1,3 @@
-export * from './helius-provider';
 export * from './jupiter-provider';
 export * from './birdeye-provider';
 export * from './solscan-provider';

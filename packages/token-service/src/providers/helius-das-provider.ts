@@ -75,7 +75,7 @@ export class HeliusDasProvider implements TokenDataProvider {
         return {
             mint,
             priceUsd: response.token_info.price_info.price_per_token,
-            priceChangePercentage24h: null,
+            priceChangePercentage24h: undefined,
             provider: this.name,
             timestamp: Date.now()
         };
@@ -168,7 +168,8 @@ export class HeliusDasProvider implements TokenDataProvider {
      */
     private async getSolBalance(address: string): Promise<number> {
         try {
-            const balance = await this.client.rpc.getBalance(address);
+            const balance = await (this.client.rpc as any).getBalance(address);
+            // const balance = await this.client.rpc.getBalance(address);
             return balance.lamports / 1e9; // Convert lamports to SOL
         } catch (error) {
             console.warn(`Failed to get SOL balance for ${address}: ${error}`);

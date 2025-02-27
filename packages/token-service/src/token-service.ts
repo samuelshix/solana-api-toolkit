@@ -12,7 +12,6 @@ import {
     TokenPrice
 } from './types';
 import {
-    HeliusProvider,
     JupiterProvider,
     BirdeyeProvider,
     SolscanProvider,
@@ -46,11 +45,6 @@ export class TokenService {
      * Initialize providers based on configuration
      */
     private initializeProviders(config: TokenServiceConfig): void {
-        // Add Helius provider if configured
-        if (config.helius) {
-            this.providers.push(new HeliusProvider(config.helius));
-        }
-
         // Add Helius DAS provider if configured
         if (config.heliusDas) {
             this.providers.push(new HeliusDasProvider(config.heliusDas));
@@ -294,7 +288,7 @@ export class TokenService {
                 totalValueUsd += tokenValueUsd;
             } catch (error) {
                 // If price fetch fails, just continue without price data
-                console.warn(`Failed to get price for token ${token.mint}: ${error.message}`);
+                console.warn(`Failed to get price for token ${token.mint}: ${error instanceof Error ? error.message : String(error)}`);
             }
         });
 
@@ -314,7 +308,7 @@ export class TokenService {
             return price.priceUsd;
         } catch (error) {
             // Default to a reasonable SOL price if we can't fetch it
-            console.warn(`Failed to get SOL price: ${error.message}`);
+            console.warn(`Failed to get SOL price: ${error instanceof Error ? error.message : String(error)}`);
             return 0; // Return 0 to avoid inflating portfolio value with incorrect data
         }
     }
@@ -359,7 +353,7 @@ export class TokenService {
 
             return tokenData;
         } catch (error) {
-            throw new Error(`Failed to get token data for ${mint}: ${error.message}`);
+            throw new Error(`Failed to get token data for ${mint}: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 } 

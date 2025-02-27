@@ -4,29 +4,52 @@
     "description": "Token data service with multiple provider support for Solana API Toolkit",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "build": "tsc",
         "test": "jest",
         "lint": "eslint src --ext .ts",
-        "clean": "rimraf dist"
+        "clean": "rimraf dist",
+        "prepublishOnly": "npm run clean && npm run build"
     },
     "keywords": [
         "solana",
         "token",
         "price",
         "api",
-        "client"
+        "client",
+        "jupiter",
+        "birdeye",
+        "helius",
+        "solscan",
+        "coingecko",
+        "coinmarketcap",
+        "pyth"
     ],
     "author": "",
     "license": "MIT",
     "dependencies": {
         "@pythnetwork/client": "^2.14.0",
-        "@solana-api-toolkit/core": "file:../core",
-        "@solana-api-toolkit/helius": "^0.1.0",
+        "@solana-api-toolkit/core": "^0.1.0",
         "@solana/web3.js": "^1.73.0",
         "helius-sdk": "^1.4.2"
     },
     "devDependencies": {
         "rimraf": "^4.1.2"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/solana-api-toolkit.git"
+    },
+    "bugs": {
+        "url": "https://github.com/yourusername/solana-api-toolkit/issues"
+    },
+    "homepage": "https://github.com/yourusername/solana-api-toolkit#readme"
 }
