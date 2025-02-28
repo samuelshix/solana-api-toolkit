@@ -68,9 +68,7 @@ export class BirdeyeProvider implements TokenDataProvider {
         return {
             mint,
             priceUsd: response.data.value,
-            priceChangePercentage24h: response.data.priceChange24h,
-            volume24h: response.data.volume24h,
-            marketCap: response.data.marketCap,
+            priceChangePercentage24h: response.data.valueChange24h,
             provider: this.name,
             timestamp: Date.now()
         };

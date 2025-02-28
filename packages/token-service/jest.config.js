@@ -5,7 +5,7 @@ module.exports = {
     testMatch: [
         '**/test/**/*.test.ts'
     ],
-    collectCoverage: true,
+    collectCoverage: false,
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov'],
     collectCoverageFrom: [
@@ -30,6 +30,10 @@ module.exports = {
         }]
     },
     transformIgnorePatterns: [
-        '/node_modules/(?!(p-retry|retry)/)'
-    ]
+        '/node_modules/(?!(p-retry|retry))'
+    ],
+    // Mock p-retry to avoid ESM issues
+    moduleNameMapper: {
+        'p-retry': '<rootDir>/test/mocks/p-retry.js'
+    }
 }; 

@@ -73,9 +73,10 @@ export class PythProvider implements TokenDataProvider {
                 priceUsd: price.price,
                 provider: this.name,
                 timestamp: Date.now(),
-                confidence: price.confidence,
-                status: String(priceFeed.status)
-            } as TokenPrice & { confidence: number; status: string };
+                // confidence: price.confidence,
+                // status: String(priceFeed.status)
+            } as TokenPrice;
+            // & { confidence: number; status: string };
         } catch (error) {
             throw new Error(`Failed to get price from Pyth: ${error instanceof Error ? error.message : String(error)}`);
         }

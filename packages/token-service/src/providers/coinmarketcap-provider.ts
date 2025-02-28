@@ -87,8 +87,6 @@ export class CoinMarketCapProvider implements TokenDataProvider {
             mint,
             priceUsd: quote.price,
             priceChangePercentage24h: quote.percent_change_24h,
-            volume24h: quote.volume_24h,
-            marketCap: quote.market_cap,
             provider: this.name,
             timestamp: Date.now()
         };

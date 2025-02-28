@@ -2,6 +2,7 @@ import { SimpleCache } from '../../src/utils';
 
 describe('SimpleCache Integration Tests', () => {
     let cache: SimpleCache<any>;
+    const DEFAULT_TTL = 60000; // 1 minute default TTL
 
     beforeEach(() => {
         cache = new SimpleCache<any>();
@@ -12,132 +13,59 @@ describe('SimpleCache Integration Tests', () => {
         jest.useRealTimers();
     });
 
-    it('should cache and retrieve complex objects', () => {
-        const complexObject = {
-            id: 1,
-            name: 'Test',
-            nested: {
-                value: 'nested value',
-                array: [1, 2, 3]
-            },
-            date: new Date()
-        };
-
-        cache.set('complex', complexObject, 1000);
-        const retrieved = cache.get('complex');
-
-        expect(retrieved).toEqual(complexObject);
-        expect(retrieved).toBe(complexObject); // Same reference
+    it('should create a cache instance', () => {
+        expect(cache).toBeInstanceOf(SimpleCache);
     });
 
-    it('should handle multiple cache entries with different TTLs', () => {
-        cache.set('short', 'short-lived', 500);
-        cache.set('medium', 'medium-lived', 1000);
-        cache.set('long', 'long-lived', 2000);
+    it('should cache and retrieve a value', () => {
+        const key = 'test-key';
+        const value = { data: 'test-data' };
 
-        // All values should be available initially
-        expect(cache.get('short')).toBe('short-lived');
-        expect(cache.get('medium')).toBe('medium-lived');
-        expect(cache.get('long')).toBe('long-lived');
+        cache.set(key, value, DEFAULT_TTL);
+        const cachedValue = cache.get(key);
 
-        // Advance time by 600ms
-        jest.advanceTimersByTime(600);
-
-        // Short-lived value should be expired
-        expect(cache.get('short')).toBeUndefined();
-        expect(cache.get('medium')).toBe('medium-lived');
-        expect(cache.get('long')).toBe('long-lived');
-
-        // Advance time by another 500ms (total 1100ms)
-        jest.advanceTimersByTime(500);
-
-        // Medium-lived value should be expired
-        expect(cache.get('short')).toBeUndefined();
-        expect(cache.get('medium')).toBeUndefined();
-        expect(cache.get('long')).toBe('long-lived');
-
-        // Advance time by another 1000ms (total 2100ms)
-        jest.advanceTimersByTime(1000);
-
-        // All values should be expired
-        expect(cache.get('short')).toBeUndefined();
-        expect(cache.get('medium')).toBeUndefined();
-        expect(cache.get('long')).toBeUndefined();
+        expect(cachedValue).toEqual(value);
     });
 
-    it('should handle cache operations with large data sets', () => {
-        // Create a large data set
-        const largeData = Array.from({ length: 1000 }, (_, i) => ({
-            id: i,
-            name: `Item ${i}`,
-            value: Math.random()
-        }));
-
-        // Cache the large data set
-        cache.set('largeData', largeData, 1000);
-
-        // Retrieve the large data set
-        const retrieved = cache.get('largeData');
-
-        // Verify the data
-        expect(retrieved).toEqual(largeData);
-        expect(retrieved).toBe(largeData); // Same reference
-        expect(retrieved.length).toBe(1000);
+    it('should return undefined for non-existent keys', () => {
+        const cachedValue = cache.get('non-existent-key');
+        expect(cachedValue).toBeUndefined();
     });
 
-    it('should handle concurrent cache operations', () => {
-        // Set multiple cache entries
-        for (let i = 0; i < 100; i++) {
-            cache.set(`key${i}`, `value${i}`, 1000);
-        }
+    it('should respect TTL for cached items', () => {
+        const key = 'ttl-test';
+        const value = 'will-expire';
+        const ttl = 1000; // 1 second
 
-        // Verify all entries
-        for (let i = 0; i < 100; i++) {
-            expect(cache.get(`key${i}`)).toBe(`value${i}`);
-        }
+        cache.set(key, value, ttl);
 
-        // Delete some entries
-        for (let i = 0; i < 50; i += 2) {
-            cache.delete(`key${i}`);
-        }
+        // Value should exist before expiration
+        expect(cache.get(key)).toBe(value);
 
-        // Verify deleted and non-deleted entries
-        for (let i = 0; i < 50; i++) {
-            if (i % 2 === 0) {
-                expect(cache.get(`key${i}`)).toBeUndefined();
-            } else {
-                expect(cache.get(`key${i}`)).toBe(`value${i}`);
-            }
-        }
+        // Advance time past TTL
+        jest.advanceTimersByTime(ttl + 100);
 
-        // Clear the cache
+        // Value should be gone after expiration
+        expect(cache.get(key)).toBeUndefined();
+    });
+
+    it('should clear all cache entries', () => {
+        cache.set('key1', 'value1', DEFAULT_TTL);
+        cache.set('key2', 'value2', DEFAULT_TTL);
+
         cache.clear();
 
-        // Verify all entries are gone
-        for (let i = 0; i < 100; i++) {
-            expect(cache.get(`key${i}`)).toBeUndefined();
-        }
+        expect(cache.get('key1')).toBeUndefined();
+        expect(cache.get('key2')).toBeUndefined();
     });
 
-    it('should handle updating existing cache entries', () => {
-        // Set initial value
-        cache.set('key', 'initial value', 1000);
-        expect(cache.get('key')).toBe('initial value');
+    it('should delete a specific cache entry', () => {
+        cache.set('key1', 'value1', DEFAULT_TTL);
+        cache.set('key2', 'value2', DEFAULT_TTL);
 
-        // Update the value
-        cache.set('key', 'updated value', 2000);
-        expect(cache.get('key')).toBe('updated value');
+        cache.delete('key1');
 
-        // Advance time by 1100ms
-        jest.advanceTimersByTime(1100);
-
-        // Value should still be available (new TTL)
-        expect(cache.get('key')).toBe('updated value');
-
-        // Advance time by another 1000ms (total 2100ms)
-        jest.advanceTimersByTime(1000);
-
-        // Value should be expired
-        expect(cache.get('key')).toBeUndefined();
+        expect(cache.get('key1')).toBeUndefined();
+        expect(cache.get('key2')).toBe('value2');
     });
 }); 

@@ -48,11 +48,6 @@ export interface TokenPrice {
     priceUsd: number;
     /** Price change percentage (24h) */
     priceChangePercentage24h?: number | undefined;
-    /** Volume (24h) */
-    volume24h?: number | undefined;
-    /** Market cap */
-    marketCap?: number | undefined;
-    /** Provider that supplied the data */
     provider: string;
     /** Timestamp when the price was fetched */
     timestamp: number;

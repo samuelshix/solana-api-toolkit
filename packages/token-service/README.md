@@ -9,11 +9,12 @@ A powerful and flexible token data service for Solana with multi-provider suppor
 
 - **Multi-Provider Support**: Seamlessly integrates with multiple token data providers including Helius, Jupiter, Birdeye, Solscan, CoinMarketCap, CoinGecko, and Pyth
 - **Automatic Fallbacks**: Gracefully falls back to alternative providers if a primary provider fails
-- **Intelligent Caching**: Reduces API calls and improves performance with configurable TTL caching
-- **Comprehensive Token Data**: Access token prices, metadata, balances, and wallet portfolios
+- **Intelligent Caching**: Reduces api calls and improves performance with configurable TTL caching
+- **Comprehensive Token Data**: Easily access token prices, metadata, balances, and wallet portfolios
 - **Type-Safe**: Written in TypeScript with full type definitions
 - **Error Handling**: Robust error handling with detailed error messages
 - **Circuit Breaker Pattern**: Prevents cascading failures with built-in circuit breaker
+- **Bundling rpc with api calls**: Bundles direct rpc calls with api calls as needed (e.g. a single getWalletPortfolio() call from the Helius provider uses both `connection.getBalance()` for native SOL and the Helius SDK's `getAssetsByOwner()` for SPL token balances)
 
 ## Installation
 

@@ -23,30 +23,44 @@ class CoinGeckoClient extends HttpClient {
      * Get token price from CoinGecko by contract address
      */
     async getTokenPrice(contractAddress: string): Promise<any> {
-        return this.get<any>(`/coins/solana/contract/${contractAddress}`, undefined, {
-            'x-cg-pro-api-key': this.config.apiKey
-        });
+        try {
+            return this.get<any>(`/coins/solana/contract/${contractAddress}`, undefined, {
+                'x-cg-pro-api-key': this.config.apiKey
+            });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to get token price for ${contractAddress}: ${errorMessage}`);
+        }
     }
 
     /**
      * Get token prices for multiple tokens
      */
     async getTokenPrices(contractAddresses: string[]): Promise<any> {
-        const addressesParam = contractAddresses.join(',');
-        return this.get<any>(`/simple/token_price/solana`, {
-            contract_addresses: addressesParam,
-            vs_currencies: 'usd',
-            include_market_cap: 'true',
-            include_24hr_vol: 'true',
-            include_24hr_change: 'true'
-        }, { 'x-cg-pro-api-key': this.config.apiKey });
+        try {
+            const addressesParam = contractAddresses.join(',');
+            return this.get<any>(`/simple/token_price/solana`, {
+                contract_addresses: addressesParam,
+                vs_currencies: 'usd'
+            }, { 'x-cg-pro-api-key': this.config.apiKey });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to get token prices: ${errorMessage}`);
+        }
     }
 
     /**
      * Get coin data by ID
      */
     async getCoinById(coinId: string): Promise<any> {
-        return this.get<any>(`/coins/${coinId}`);
+        try {
+            return this.get<any>(`/coins/${coinId}`, undefined, {
+                'x-cg-pro-api-key': this.config.apiKey
+            });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to get coin data for ${coinId}: ${errorMessage}`);
+        }
     }
 }
 
@@ -68,15 +82,43 @@ export class CoinGeckoProvider implements TokenDataProvider {
 
     // Map of known token addresses to CoinGecko IDs
     private tokenAddressMap: Record<string, string> = {
+        // Native SOL and wrapped SOL
         'So11111111111111111111111111111111111111112': 'solana',
-        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'usd-coin',
-        'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'tether',
+
+        // Stablecoins
+        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'usd-coin', // USDC
+        'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'tether', // USDT
+
+        '9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E': 'wrapped-bitcoin', // BTC
+        '2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk': 'ethereum', // ETH
+        'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'bonk', // BONK
+        'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'marinade-staked-sol', // mSOL
+        'DUSTawucrTsGU8hcqRdHDCbuYhCPADMLM2VcCb8VnFnQ': 'dust-protocol', // DUST
+        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4': 'jupiter', // JUP
+        'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE': 'orca', // ORCA
+        'RLBxxFkseAZ4RgJH3Sqn8jXxhmGoz9jWxDNJMh8pL7a': 'render-token', // RNDR
+
         // Add more mappings as needed
+    };
+
+    // Map of token decimals for common tokens
+    private tokenDecimalsMap: Record<string, number> = {
+        'So11111111111111111111111111111111111111112': 9, // SOL
+        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 6, // USDC
+        'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 6, // USDT
+        '9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E': 8, // BTC
+        '2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk': 8, // ETH
+        'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 5, // BONK
+        'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 9, // mSOL
+        'DUSTawucrTsGU8hcqRdHDCbuYhCPADMLM2VcCb8VnFnQ': 9, // DUST
+        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4': 6, // JUP
+        'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE': 6, // ORCA
+        'RLBxxFkseAZ4RgJH3Sqn8jXxhmGoz9jWxDNJMh8pL7a': 8, // RNDR
     };
 
     constructor(config: ProviderConfig) {
         this.client = new CoinGeckoClient(config);
-        this.priority = config.priority ?? 2;
+        this.priority = config.priority ?? 6; // Lower priority as it's a fallback
     }
 
     /**
@@ -99,32 +141,35 @@ export class CoinGeckoProvider implements TokenDataProvider {
                 mint,
                 priceUsd: response.market_data.current_price.usd,
                 priceChangePercentage24h: response.market_data.price_change_percentage_24h,
-                volume24h: response.market_data.total_volume.usd,
-                marketCap: response.market_data.market_cap.usd,
                 provider: this.name,
                 timestamp: Date.now()
             };
         } catch (error) {
             // If direct lookup fails, try using the mapping
             if (this.tokenAddressMap[mint]) {
-                const response = await this.client.getCoinById(this.tokenAddressMap[mint]);
+                try {
+                    const coinId = this.tokenAddressMap[mint];
+                    const response = await this.client.getCoinById(coinId);
 
-                if (!response || !response.market_data || response.market_data.current_price.usd === undefined) {
-                    throw new Error(`Price data not available for token ${mint}`);
+                    if (!response || !response.market_data || response.market_data.current_price.usd === undefined) {
+                        throw new Error(`Price data not available for token ${mint}`);
+                    }
+
+                    return {
+                        mint,
+                        priceUsd: response.market_data.current_price.usd,
+                        priceChangePercentage24h: response.market_data.price_change_percentage_24h,
+                        provider: this.name,
+                        timestamp: Date.now()
+                    };
+                } catch (mappingError) {
+                    const errorMessage = mappingError instanceof Error ? mappingError.message : String(mappingError);
+                    throw new Error(`Failed to get price using coin ID mapping: ${errorMessage}`);
                 }
-
-                return {
-                    mint,
-                    priceUsd: response.market_data.current_price.usd,
-                    priceChangePercentage24h: response.market_data.price_change_percentage_24h,
-                    volume24h: response.market_data.total_volume.usd,
-                    marketCap: response.market_data.market_cap.usd,
-                    provider: this.name,
-                    timestamp: Date.now()
-                };
             }
 
-            throw new Error(`Price data not available for token ${mint}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`Price data not available for token ${mint}: ${errorMessage}`);
         }
     }
 
@@ -137,41 +182,53 @@ export class CoinGeckoProvider implements TokenDataProvider {
         }
 
         try {
-            // Try direct contract address lookup first
             const response = await this.client.getTokenPrice(mint);
 
             if (!response) {
                 throw new Error('Token data not available');
             }
 
+            // Use our decimals map if available, otherwise default to 0
+            const decimals = this.tokenDecimalsMap[mint] || 0;
+
             return {
                 mint,
                 name: response.name,
                 symbol: response.symbol.toUpperCase(),
-                decimals: 0, // CoinGecko doesn't provide decimals
+                decimals,
                 logoUrl: response.image?.large,
                 priceUsd: response.market_data?.current_price?.usd
             };
         } catch (error) {
             // If direct lookup fails, try using the mapping
             if (this.tokenAddressMap[mint]) {
-                const response = await this.client.getCoinById(this.tokenAddressMap[mint]);
+                try {
+                    const coinId = this.tokenAddressMap[mint];
+                    const response = await this.client.getCoinById(coinId);
 
-                if (!response) {
-                    throw new Error(`Token data not available for ${mint}`);
+                    if (!response) {
+                        throw new Error(`Token data not available for ${mint}`);
+                    }
+
+                    // Use our decimals map if available, otherwise default to 0
+                    const decimals = this.tokenDecimalsMap[mint] || 0;
+
+                    return {
+                        mint,
+                        name: response.name,
+                        symbol: response.symbol.toUpperCase(),
+                        decimals,
+                        logoUrl: response.image?.large,
+                        priceUsd: response.market_data?.current_price?.usd
+                    };
+                } catch (mappingError) {
+                    const errorMessage = mappingError instanceof Error ? mappingError.message : String(mappingError);
+                    throw new Error(`Failed to get metadata using coin ID mapping: ${errorMessage}`);
                 }
-
-                return {
-                    mint,
-                    name: response.name,
-                    symbol: response.symbol.toUpperCase(),
-                    decimals: 0, // CoinGecko doesn't provide decimals
-                    logoUrl: response.image?.large,
-                    priceUsd: response.market_data?.current_price?.usd
-                };
             }
 
-            throw new Error(`Token data not available for ${mint}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`Token data not available for ${mint}: ${errorMessage}`);
         }
     }
 } 

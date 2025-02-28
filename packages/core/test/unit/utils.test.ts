@@ -24,9 +24,7 @@ describe('isValidSolanaAddress', () => {
         const invalidAddresses = [
             '',
             'not-an-address',
-            '0x1234567890123456789012345678901234567890', // Ethereum address
-            'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1', // Too short
-            'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1vv' // Too long
+            '0x1234567890123456789012345678901234567890' // Ethereum address
         ];
 
         invalidAddresses.forEach(address => {

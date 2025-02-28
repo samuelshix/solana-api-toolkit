@@ -6,7 +6,7 @@ This guide explains how to publish the token-service package to npm.
 
 1. You need an npm account. If you don't have one, create it at [npmjs.com](https://www.npmjs.com/signup).
 2. You need to be logged in to npm in your terminal. Run `npm login` and follow the prompts.
-3. If this is a scoped package (which it is, with the `@solana-api-toolkit` scope), you need to either:
+3. You need to either:
    - Have permission to publish to this scope
    - Create your own scope (e.g., `@your-username`)
 

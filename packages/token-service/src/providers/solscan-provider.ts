@@ -65,8 +65,6 @@ export class SolscanProvider implements TokenDataProvider {
             mint,
             priceUsd: parseFloat(response.priceUsdt),
             priceChangePercentage24h: response.priceChange24h,
-            volume24h: response.volume24h,
-            marketCap: response.marketCap,
             provider: this.name,
             timestamp: Date.now()
         };
