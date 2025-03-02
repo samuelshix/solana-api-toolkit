@@ -6,6 +6,7 @@ import {
 } from '@solana-api-toolkit/core';
 import { TokenDataProvider, ProviderConfig, TokenPrice } from '../types';
 
+// TODO: migrate to new Jupiter API https://station.jup.ag/docs/api/mints-in-market
 /**
  * Jupiter API client
  */
@@ -72,7 +73,7 @@ export class JupiterProvider implements TokenDataProvider {
         return {
             mint,
             priceUsd: priceData.price,
-            priceChangePercentage24h: priceData.price_24h_change_percentage,
+            // priceChangePercentage24h: priceData.price_24h_change_percentage,
             provider: this.name,
             timestamp: Date.now()
         };

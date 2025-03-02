@@ -21,12 +21,18 @@ class CoinMarketCapClient extends HttpClient {
 
     /**
      * Get token price from CoinMarketCap
-     * Note: CoinMarketCap requires a contract address mapping
      */
-    async getTokenPrice(contractAddress: string): Promise<any> {
+    async getTokenPrice(symbol: string | string[]): Promise<any> {
+        if (Array.isArray(symbol)) {
+            return this.get<any>(`/cryptocurrency/quotes/latest`, {
+                symbol: symbol.join(',')
+            }, {
+                'X-CMC_PRO_API_KEY': this.config.apiKey
+            });
+        }
+
         return this.get<any>(`/cryptocurrency/quotes/latest`, {
-            address: contractAddress,
-            platform: 'solana'
+            symbol: symbol
         }, {
             'X-CMC_PRO_API_KEY': this.config.apiKey
         });

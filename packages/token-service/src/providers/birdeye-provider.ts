@@ -20,16 +20,26 @@ class BirdeyeClient extends HttpClient {
     }
 
     /**
-     * Get token price from Birdeye
+     * Get token price Birdeye API call
      */
     async getPrice(mint: string): Promise<any> {
-        return this.get<any>(`/public/price?address=${mint}`, undefined, {
+        return this.get<any>(`/defi/price?address=${mint}`, undefined, {
             'X-API-KEY': this.config.apiKey
         });
     }
 
     /**
-     * Get token metadata from Birdeye
+     * Get token prices Birdeye API call
+     */
+    async getPrices(contractAddresses: string[]): Promise<any> {
+        const addressesParam = contractAddresses.join(',');
+        return this.get<any>(`/defi/multi_price?list_address=${addressesParam}`, undefined, {
+            'X-API-KEY': this.config.apiKey
+        });
+    }
+
+    /**
+     * Get token metadata Birdeye API call
      */
     async getTokenInfo(mint: string): Promise<any> {
         return this.get<any>(`/public/token_list/detail?address=${mint}`, undefined, {
@@ -65,14 +75,45 @@ export class BirdeyeProvider implements TokenDataProvider {
             throw new Error(`Price data not available for token ${mint}`);
         }
 
+        const priceChangePercentage24h = (response.data.priceChange24h / (response.data.value - response.data.priceChange24h)) * 100;
+
         return {
             mint,
             priceUsd: response.data.value,
-            priceChangePercentage24h: response.data.valueChange24h,
+            priceChangePercentage24h: priceChangePercentage24h,
             provider: this.name,
             timestamp: Date.now()
         };
     }
+
+    // TODO: Use the multi price endpoint instead of successive single price calls. Can't validate this as requires paid plan
+    // /**
+    //  * Get token prices for multiple tokens from Birdeye (requires paid plan)
+    //  */
+    // async getTokenPrices(mints: string[]): Promise<TokenPrice[]> {
+    //     const response = await this.client.getPrices(mints);
+
+    //     if (!response.data || response.data.value === undefined) {
+    //         throw new Error(`Price data not available for tokens: ${mints}`);
+    //     }
+
+    //     const tokenPrices: TokenPrice[] = [];
+
+    //     for (const priceData in response.data) {
+    //         const priceDataValue = response.data[priceData];
+    //         const priceChangePercentage24h = (priceDataValue.priceChange24h / (priceDataValue.value - priceDataValue.priceChange24h)) * 100;
+    //         tokenPrices.push({
+    //             mint: priceData,
+    //             priceUsd: priceDataValue.value,
+    //             priceChangePercentage24h: priceChangePercentage24h,
+    //             provider: this.name,
+    //             timestamp: Date.now()
+    //         });
+    //     }
+
+    //     // TODO: if the user only has free plan
+    //     // return response.data.map((price: any) => this.getTokenPrice(price.address));
+    // }
 
     /**
      * Get token metadata from Birdeye
