@@ -143,6 +143,11 @@ Each provider configuration accepts:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+
+## Backlog
+- [ ] Add support for price history 
+- [ ] Add support for transaction swap history
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details. 
