@@ -116,7 +116,7 @@ import {
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. Please follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
 
 ## Backlog
 - [ ] Additional @solana-api-toolkit packages for other common API uses
