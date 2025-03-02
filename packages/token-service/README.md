@@ -14,6 +14,7 @@ A powerful and flexible token data service for Solana with multi-provider suppor
 - **Type-Safe**: Written in TypeScript with full type definitions
 - **Error Handling**: Robust error handling with detailed error messages
 - **Circuit Breaker Pattern**: Prevents cascading failures with built-in circuit breaker
+- **Coin mappings**: Included maps of CoinGecko and CoinMarketCap coins to Solana addresses, and scripts to update them
 - **Bundling rpc with api calls**: Bundles direct rpc calls with api calls as needed (e.g. a single getWalletPortfolio() call from the Helius provider uses both `connection.getBalance()` for native SOL and the Helius SDK's `getAssetsByOwner()` for SPL token balances)
 
 ## Installation
@@ -96,7 +97,6 @@ constructor(config: TokenServiceConfig = {})
 
 The `TokenServiceConfig` interface supports the following providers:
 
-- `helius`: Helius provider configuration
 - `heliusDas`: Helius DAS provider configuration
 - `jupiter`: Jupiter provider configuration
 - `birdeye`: Birdeye provider configuration

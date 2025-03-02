@@ -5,7 +5,9 @@ import {
     isValidSolanaAddress
 } from '@solana-api-toolkit/core';
 import { TokenDataProvider, ProviderConfig, TokenPrice } from '../types';
+import tokenAddressMap from '../providerCoinMappings/coingecko/coingecko.json';
 
+// TODO: paid plans must use pro-api.coingecko.com and free plans must use api.coingecko.com
 /**
  * CoinGecko API client
  */
@@ -79,28 +81,7 @@ export class CoinGeckoProvider implements TokenDataProvider {
     readonly name = 'coingecko';
     readonly priority: number;
     private client: CoinGeckoClient;
-
-    // Map of known token addresses to CoinGecko IDs
-    private tokenAddressMap: Record<string, string> = {
-        // Native SOL and wrapped SOL
-        'So11111111111111111111111111111111111111112': 'solana',
-
-        // Stablecoins
-        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'usd-coin', // USDC
-        'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'tether', // USDT
-
-        '9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E': 'wrapped-bitcoin', // BTC
-        '2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk': 'ethereum', // ETH
-        'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'bonk', // BONK
-        'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'marinade-staked-sol', // mSOL
-        'DUSTawucrTsGU8hcqRdHDCbuYhCPADMLM2VcCb8VnFnQ': 'dust-protocol', // DUST
-        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4': 'jupiter', // JUP
-        'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE': 'orca', // ORCA
-        'RLBxxFkseAZ4RgJH3Sqn8jXxhmGoz9jWxDNJMh8pL7a': 'render-token', // RNDR
-
-        // Add more mappings as needed
-    };
-
+    private tokenAddressMap: Record<string, string> = tokenAddressMap;
     // Map of token decimals for common tokens
     private tokenDecimalsMap: Record<string, number> = {
         'So11111111111111111111111111111111111111112': 9, // SOL
@@ -178,28 +159,31 @@ export class CoinGeckoProvider implements TokenDataProvider {
      */
     async getTokenMetadata(mint: string): Promise<TokenInfo> {
         if (!isValidSolanaAddress(mint)) {
-            throw new ValidationError('Invalid token mint address', 'mint');
+            throw new ValidationError(`Invalid token mint address: ${mint}`);
         }
 
         try {
             const response = await this.client.getTokenPrice(mint);
 
             if (!response) {
-                throw new Error('Token data not available');
+                throw new Error(`Token data not available for ${mint}`);
             }
-
-            // Use our decimals map if available, otherwise default to 0
-            const decimals = this.tokenDecimalsMap[mint] || 0;
+            if (!response.details_platforms.solana) {
+                throw new ValidationError(`Token decimals not available for ${mint}`);
+            }
 
             return {
                 mint,
                 name: response.name,
                 symbol: response.symbol.toUpperCase(),
-                decimals,
+                decimals: response.details_platforms.solana.decimals,
                 logoUrl: response.image?.large,
                 priceUsd: response.market_data?.current_price?.usd
             };
         } catch (error) {
+            if (error instanceof ValidationError) {
+                throw error;
+            }
             // If direct lookup fails, try using the mapping
             if (this.tokenAddressMap[mint]) {
                 try {
