@@ -1,5 +1,5 @@
 {
-    "name": "solana-api-toolkit-core",
+    "name": "@solana-api-toolkit/core",
     "version": "1.0.0",
     "description": "Core utilities and interfaces for Solana API Toolkit",
     "main": "dist/index.js",
