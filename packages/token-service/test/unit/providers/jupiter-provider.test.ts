@@ -56,7 +56,6 @@ describe('JupiterProvider', () => {
                         vsToken: 'USDC',
                         vsTokenSymbol: 'USDC',
                         price: 1.0,
-                        price_24h_change_percentage: 0.5
                     }
                 }
             };
@@ -68,7 +67,6 @@ describe('JupiterProvider', () => {
             expect(result).toBeDefined();
             expect(result.mint).toBe(validMint);
             expect(result.priceUsd).toBe(1.0);
-            expect(result.priceChangePercentage24h).toBe(0.5);
             expect(result.provider).toBe('jupiter');
             expect(mockClient.getPrice).toHaveBeenCalledWith(validMint);
         });

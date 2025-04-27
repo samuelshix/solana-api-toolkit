@@ -23,13 +23,13 @@ class CoinMarketCapClient extends HttpClient {
      * Get token price from CoinMarketCap
      */
     async getTokenPrice(symbol: string | string[]): Promise<any> {
-        if (Array.isArray(symbol)) {
-            return this.get<any>(`/cryptocurrency/quotes/latest`, {
-                symbol: symbol.join(',')
-            }, {
-                'X-CMC_PRO_API_KEY': this.config.apiKey
-            });
-        }
+        // if (Array.isArray(symbol)) {
+        //     return this.get<any>(`/cryptocurrency/quotes/latest`, {
+        //         symbol: symbol.join(',')
+        //     }, {
+        //         'X-CMC_PRO_API_KEY': this.config.apiKey
+        //     });
+        // }
 
         return this.get<any>(`/cryptocurrency/quotes/latest`, {
             symbol: symbol

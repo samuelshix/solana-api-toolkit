@@ -14,7 +14,7 @@ class JupiterClient extends HttpClient {
     constructor(config: ProviderConfig) {
         super({
             apiKey: config.apiKey,
-            baseUrl: config.baseUrl || 'https://price.jup.ag/v4',
+            baseUrl: config.baseUrl || 'https://lite-api.jup.ag',
             timeout: config.timeout,
             maxRetries: config.maxRetries
         });
@@ -25,11 +25,11 @@ class JupiterClient extends HttpClient {
      */
     async getPrice(mint: string): Promise<any> {
         if (this.config.apiKey) {
-            return this.get<any>(`/price?ids=${mint}`, undefined, {
+            return this.get<any>(`/price/v2?ids=${mint}`, undefined, {
                 'x-api-key': this.config.apiKey
             });
         } else {
-            return this.get<any>(`/price?ids=${mint}`);
+            return this.get<any>(`/price/v2?ids=${mint}`);
         }
     }
 

@@ -4,4 +4,4 @@ export * from './solscan-provider';
 export * from './helius-das-provider';
 export * from './coinmarketcap-provider';
 export * from './coingecko-provider';
-export * from './pyth-provider'; 
+// export * from './pyth-provider'; 

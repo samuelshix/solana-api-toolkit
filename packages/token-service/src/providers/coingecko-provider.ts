@@ -82,20 +82,6 @@ export class CoinGeckoProvider implements TokenDataProvider {
     readonly priority: number;
     private client: CoinGeckoClient;
     private tokenAddressMap: Record<string, string> = tokenAddressMap;
-    // Map of token decimals for common tokens
-    private tokenDecimalsMap: Record<string, number> = {
-        'So11111111111111111111111111111111111111112': 9, // SOL
-        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 6, // USDC
-        'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 6, // USDT
-        '9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E': 8, // BTC
-        '2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk': 8, // ETH
-        'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 5, // BONK
-        'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 9, // mSOL
-        'DUSTawucrTsGU8hcqRdHDCbuYhCPADMLM2VcCb8VnFnQ': 9, // DUST
-        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4': 6, // JUP
-        'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE': 6, // ORCA
-        'RLBxxFkseAZ4RgJH3Sqn8jXxhmGoz9jWxDNJMh8pL7a': 8, // RNDR
-    };
 
     constructor(config: ProviderConfig) {
         this.client = new CoinGeckoClient(config);
@@ -126,7 +112,7 @@ export class CoinGeckoProvider implements TokenDataProvider {
                 timestamp: Date.now()
             };
         } catch (error) {
-            // If direct lookup fails, try using the mapping
+            // If lookup with mint fails, try using the mapping
             if (this.tokenAddressMap[mint]) {
                 try {
                     const coinId = this.tokenAddressMap[mint];
@@ -147,15 +133,14 @@ export class CoinGeckoProvider implements TokenDataProvider {
                     const errorMessage = mappingError instanceof Error ? mappingError.message : String(mappingError);
                     throw new Error(`Failed to get price using coin ID mapping: ${errorMessage}`);
                 }
+            } else {
+                throw new Error('Coingecko ID does not exist in current mapping')
             }
-
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            throw new Error(`Price data not available for token ${mint}: ${errorMessage}`);
         }
     }
 
     /**
-     * Get token metadata from CoinGecko
+     * Get token metadata from CoinGecko (calls getTokenPrice for metadata)
      */
     async getTokenMetadata(mint: string): Promise<TokenInfo> {
         if (!isValidSolanaAddress(mint)) {
@@ -183,32 +168,6 @@ export class CoinGeckoProvider implements TokenDataProvider {
         } catch (error) {
             if (error instanceof ValidationError) {
                 throw error;
-            }
-            // If direct lookup fails, try using the mapping
-            if (this.tokenAddressMap[mint]) {
-                try {
-                    const coinId = this.tokenAddressMap[mint];
-                    const response = await this.client.getCoinById(coinId);
-
-                    if (!response) {
-                        throw new Error(`Token data not available for ${mint}`);
-                    }
-
-                    // Use our decimals map if available, otherwise default to 0
-                    const decimals = this.tokenDecimalsMap[mint] || 0;
-
-                    return {
-                        mint,
-                        name: response.name,
-                        symbol: response.symbol.toUpperCase(),
-                        decimals,
-                        logoUrl: response.image?.large,
-                        priceUsd: response.market_data?.current_price?.usd
-                    };
-                } catch (mappingError) {
-                    const errorMessage = mappingError instanceof Error ? mappingError.message : String(mappingError);
-                    throw new Error(`Failed to get metadata using coin ID mapping: ${errorMessage}`);
-                }
             }
 
             const errorMessage = error instanceof Error ? error.message : String(error);

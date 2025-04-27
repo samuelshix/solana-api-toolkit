@@ -51,7 +51,7 @@ describe('BirdeyeProvider', () => {
             const mockResponse = {
                 data: {
                     value: 1.0,
-                    valueChange24h: 0.01,
+                    priceChange24h: 0.1,
                     updateUnixTime: Date.now() / 1000
                 }
             };
@@ -63,7 +63,7 @@ describe('BirdeyeProvider', () => {
             expect(result).toBeDefined();
             expect(result.mint).toBe(validMint);
             expect(result.priceUsd).toBe(1.0);
-            expect(result.priceChangePercentage24h).toBe(0.01);
+            expect(result.priceChangePercentage24h).toBe(0.1);
             expect(result.provider).toBe('birdeye');
             expect(mockClient.getPrice).toHaveBeenCalledWith(validMint);
         });

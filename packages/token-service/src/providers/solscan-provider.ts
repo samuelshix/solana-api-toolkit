@@ -5,7 +5,6 @@ import {
     isValidSolanaAddress
 } from '@solana-api-toolkit/core';
 import { TokenDataProvider, ProviderConfig, TokenPrice } from '../types';
-// TODO: validate and fix
 /**
  * Solscan API client
  */
@@ -13,7 +12,7 @@ class SolscanClient extends HttpClient {
     constructor(config: ProviderConfig) {
         super({
             apiKey: config.apiKey,
-            baseUrl: config.baseUrl || 'https://public-api.solscan.io',
+            baseUrl: config.baseUrl || 'https://public-api.solscan.io/v2.0',
             timeout: config.timeout,
             maxRetries: config.maxRetries
         });
@@ -23,7 +22,7 @@ class SolscanClient extends HttpClient {
      * Get token price from Solscan
      */
     async getPrice(mint: string): Promise<any> {
-        return this.get<any>(`/market/token/${mint}`);
+        return this.get<any>(`/token/price?tokenAddress=${mint}`);
     }
 
     /**
@@ -36,6 +35,7 @@ class SolscanClient extends HttpClient {
 
 /**
  * Solscan implementation of TokenDataProvider
+ * Requires paid API plan
  */
 export class SolscanProvider implements TokenDataProvider {
     readonly name = 'solscan';
@@ -49,13 +49,14 @@ export class SolscanProvider implements TokenDataProvider {
 
     /**
      * Get token price from Solscan
+     * Uses getTokenMetadata to get price as it returns price change percentage whereas getTokenPrice does not
      */
     async getTokenPrice(mint: string): Promise<TokenPrice> {
         if (!isValidSolanaAddress(mint)) {
             throw new ValidationError('Invalid token mint address', 'mint');
         }
 
-        const response = await this.client.getPrice(mint);
+        const response = await this.client.getTokenInfo(mint);
 
         if (!response || !response.priceUsdt) {
             throw new Error(`Price data not available for token ${mint}`);
@@ -63,8 +64,8 @@ export class SolscanProvider implements TokenDataProvider {
 
         return {
             mint,
-            priceUsd: parseFloat(response.priceUsdt),
-            priceChangePercentage24h: response.priceChange24h,
+            priceUsd: response.data.price,
+            priceChangePercentage24h: response.data.price_change_24h,
             provider: this.name,
             timestamp: Date.now()
         };
@@ -86,11 +87,11 @@ export class SolscanProvider implements TokenDataProvider {
 
         return {
             mint,
-            name: response.name,
-            symbol: response.symbol,
-            decimals: response.decimals,
-            logoUrl: response.icon,
-            priceUsd: response.price
+            name: response.data.name,
+            symbol: response.data.symbol,
+            decimals: response.data.decimals,
+            logoUrl: response.data.icon,
+            priceUsd: response.data.price
         };
     }
 } 

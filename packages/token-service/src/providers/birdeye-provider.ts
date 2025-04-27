@@ -75,12 +75,12 @@ export class BirdeyeProvider implements TokenDataProvider {
             throw new Error(`Price data not available for token ${mint}`);
         }
 
-        const priceChangePercentage24h = (response.data.priceChange24h / (response.data.value - response.data.priceChange24h)) * 100;
+        // const priceChangePercentage24h = (response.data.priceChange24h / (response.data.value - response.data.priceChange24h)) * 100;
 
         return {
             mint,
             priceUsd: response.data.value,
-            priceChangePercentage24h: priceChangePercentage24h,
+            priceChangePercentage24h: response.data.priceChange24h,
             provider: this.name,
             timestamp: Date.now()
         };

@@ -50,7 +50,7 @@ jest.mock('../../src/providers', () => {
         HeliusDasProvider: MockProvider,
         CoinMarketCapProvider: MockProvider,
         CoinGeckoProvider: MockProvider,
-        PythProvider: MockProvider
+        // PythProvider: MockProvider
     };
 });
 

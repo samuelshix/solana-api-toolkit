@@ -92,9 +92,9 @@ jest.mock('../../src/providers', () => {
         CoinGeckoProvider: jest.fn().mockImplementation((config) => {
             return new MockProvider('CoinGeckoProvider', config?.priority);
         }),
-        PythProvider: jest.fn().mockImplementation((config) => {
-            return new MockProvider('PythProvider', config?.priority);
-        })
+        // PythProvider: jest.fn().mockImplementation((config) => {
+        //     return new MockProvider('PythProvider', config?.priority);
+        // })
     };
 });
 

@@ -18,7 +18,7 @@ import {
     HeliusDasProvider,
     CoinMarketCapProvider,
     CoinGeckoProvider,
-    PythProvider
+    // PythProvider
 } from './providers';
 
 /**
@@ -76,9 +76,9 @@ export class TokenService {
         }
 
         // Add Pyth provider if configured
-        if (config.pyth) {
-            this.providers.push(new PythProvider(config.pyth));
-        }
+        // if (config.pyth) {
+        //     this.providers.push(new PythProvider(config.pyth));
+        // }
 
         // If no providers were configured, throw an error
         if (this.providers.length === 0) {

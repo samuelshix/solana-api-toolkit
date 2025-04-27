@@ -31,7 +31,12 @@ jest.mock('@solana-api-toolkit/core', () => {
         HttpClient: MockHttpClient
     };
 });
-
+jest.mock('../../../src/providerCoinMappings/coingecko/coingecko.json', () => ({
+    // Define our mock mapping here
+    'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'usd-coin',  // USDC
+    'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'tether',    // USDT
+    // Note: Deliberately NOT including the mint we want to fail
+}));
 describe('CoinGeckoProvider', () => {
     let provider: CoinGeckoProvider;
     const mockConfig: ProviderConfig = {
@@ -68,6 +73,11 @@ describe('CoinGeckoProvider', () => {
             id: 'usd-coin',
             symbol: 'usdc',
             name: 'USD Coin',
+            details_platforms: {
+                solana: {
+                    decimals: 6
+                }
+            },
             market_data: {
                 current_price: {
                     usd: 1.0
@@ -89,7 +99,7 @@ describe('CoinGeckoProvider', () => {
             await expect(provider.getTokenPrice(invalidMint)).rejects.toThrow(ValidationError);
         });
 
-        it('should return token price when direct lookup succeeds', async () => {
+        it('should return token price when direct mint lookup succeeds', async () => {
             // @ts-ignore - Accessing private property for testing
             const mockGet = provider.client.get as jest.Mock;
             mockGet.mockResolvedValueOnce(mockResponse);
@@ -104,7 +114,8 @@ describe('CoinGeckoProvider', () => {
                 timestamp: expect.any(Number)
             });
 
-            // @ts-ignore - Accessing private property for testing
+            // Verify we only called the direct mint endpoint
+            expect(mockGet).toHaveBeenCalledTimes(1);
             expect(mockGet).toHaveBeenCalledWith(
                 `/coins/solana/contract/${validMint}`,
                 undefined,
@@ -112,15 +123,18 @@ describe('CoinGeckoProvider', () => {
             );
         });
 
-        it('should use coin ID mapping when direct lookup fails', async () => {
-            // First call fails, second call succeeds with coin ID
+        it('should fallback to coin ID mapping when direct mint lookup fails', async () => {
             // @ts-ignore - Accessing private property for testing
             const mockGet = provider.client.get as jest.Mock;
 
-            // Setup the mock to first reject, then resolve
-            mockGet
-                .mockRejectedValueOnce(new Error('Not found'))
-                .mockResolvedValueOnce(mockResponse);
+            // First attempt: direct mint lookup fails
+            mockGet.mockRejectedValueOnce(new Error('Not found'));
+
+            // Second attempt: coin ID lookup succeeds
+            mockGet.mockResolvedValueOnce({
+                ...mockResponse,
+                id: 'usd-coin'  // Make sure the coin ID is explicit in the response
+            });
 
             const result = await provider.getTokenPrice(validMint);
 
@@ -132,38 +146,95 @@ describe('CoinGeckoProvider', () => {
                 timestamp: expect.any(Number)
             });
 
-            // @ts-ignore - Accessing private property for testing
+            // Verify both API calls were made in the correct order
             expect(mockGet).toHaveBeenCalledTimes(2);
-            // @ts-ignore - Accessing private property for testing
-            expect(mockGet).toHaveBeenLastCalledWith(
+            expect(mockGet).toHaveBeenNthCalledWith(
+                1,
+                `/coins/solana/contract/${validMint}`,
+                undefined,
+                { 'x-cg-pro-api-key': 'test-api-key' }
+            );
+            expect(mockGet).toHaveBeenNthCalledWith(
+                2,
                 '/coins/usd-coin',
                 undefined,
                 { 'x-cg-pro-api-key': 'test-api-key' }
             );
         });
 
-        it('should throw error when price data is not available', async () => {
+        it('should throw error when price data is missing from response', async () => {
             // @ts-ignore - Accessing private property for testing
             const mockGet = provider.client.get as jest.Mock;
             mockGet.mockResolvedValueOnce({
                 id: 'usd-coin',
                 symbol: 'usdc',
                 name: 'USD Coin',
-                // Missing market_data
+                // Missing market_data to test error handling
             });
 
             await expect(provider.getTokenPrice(validMint)).rejects.toThrow('Price data not available');
+
+            // Verify we tried the direct mint lookup, then the api call using the ID
+            expect(mockGet).toHaveBeenCalledTimes(2);
         });
 
-        it('should throw error when both direct lookup and mapping fail', async () => {
+        it('should throw error when mint does not exist in current mapping', async () => {
             const unknownMint = 'So11111111111111111111111111111111111111113'; // Unknown mint
 
             // @ts-ignore - Accessing private property for testing
             const mockGet = provider.client.get as jest.Mock;
+
+            // First attempt: direct mint lookup fails
             mockGet.mockRejectedValueOnce(new Error('Not found'));
 
             await expect(provider.getTokenPrice(unknownMint)).rejects.toThrow(
-                `Price data not available for token ${unknownMint}: Not found`
+                'Coingecko ID does not exist in current mapping'
+            );
+
+            // Verify only the first attempt was made since the mint isn't in the mapping
+            expect(mockGet).toHaveBeenCalledTimes(1);
+            expect(mockGet).toHaveBeenCalledWith(
+                `/coins/solana/contract/${unknownMint}`,
+                undefined,
+                { 'x-cg-pro-api-key': 'test-api-key' }
+            );
+        });
+
+        it('should throw error when direct lookup fails and coin ID lookup fails', async () => {
+            const knownMint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC
+
+            // Mock the tokenAddressMap to include our test mint
+            // @ts-ignore - Accessing private property for testing
+            provider.tokenAddressMap = {
+                [knownMint]: 'usd-coin'
+            };
+
+            // @ts-ignore - Accessing private property for testing
+            const mockGet = provider.client.get as jest.Mock;
+
+            // First attempt: direct mint lookup fails
+            mockGet.mockRejectedValueOnce(new Error('Not found'));
+
+            // Second attempt: coin ID lookup fails
+            mockGet.mockRejectedValueOnce(new Error('API error'));
+
+            await expect(provider.getTokenPrice(knownMint)).rejects.toThrow(
+                'Failed to get price using coin ID mapping: API error'
+            );
+
+            // Verify both attempts were made
+            expect(mockGet).toHaveBeenCalledTimes(2);
+            expect(mockGet).toHaveBeenNthCalledWith(
+                1,
+                `/coins/solana/contract/${knownMint}`,
+                undefined,
+                { 'x-cg-pro-api-key': 'test-api-key' }
+            );
+            expect(mockGet).toHaveBeenNthCalledWith(
+                2,
+                '/coins/usd-coin',
+                undefined,
+                { 'x-cg-pro-api-key': 'test-api-key' }
             );
         });
     });
@@ -175,6 +246,11 @@ describe('CoinGeckoProvider', () => {
             id: 'usd-coin',
             symbol: 'usdc',
             name: 'USD Coin',
+            details_platforms: {
+                solana: {
+                    decimals: 6
+                }
+            },
             market_data: {
                 current_price: {
                     usd: 1.0
@@ -189,7 +265,7 @@ describe('CoinGeckoProvider', () => {
             await expect(provider.getTokenMetadata(invalidMint)).rejects.toThrow(ValidationError);
         });
 
-        it('should return token metadata when direct lookup succeeds', async () => {
+        it('should return expected token metadata', async () => {
             // @ts-ignore - Accessing private property for testing
             const mockGet = provider.client.get as jest.Mock;
             mockGet.mockResolvedValueOnce(mockResponse);
@@ -213,68 +289,12 @@ describe('CoinGeckoProvider', () => {
             );
         });
 
-        it('should use coin ID mapping when direct lookup fails', async () => {
-            // First call fails, second call succeeds with coin ID
-            // @ts-ignore - Accessing private property for testing
-            const mockGet = provider.client.get as jest.Mock;
-
-            // Setup the mock to first reject, then resolve
-            mockGet
-                .mockRejectedValueOnce(new Error('Not found'))
-                .mockResolvedValueOnce(mockResponse);
-
-            const result = await provider.getTokenMetadata(validMint);
-
-            expect(result).toEqual({
-                mint: validMint,
-                name: 'USD Coin',
-                symbol: 'USDC',
-                decimals: 6, // From the decimals map
-                logoUrl: 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png',
-                priceUsd: 1.0
-            });
-
-            // @ts-ignore - Accessing private property for testing
-            expect(mockGet).toHaveBeenCalledTimes(2);
-            // @ts-ignore - Accessing private property for testing
-            expect(mockGet).toHaveBeenLastCalledWith(
-                '/coins/usd-coin',
-                undefined,
-                { 'x-cg-pro-api-key': 'test-api-key' }
-            );
-        });
-
-        it('should use default decimals when not in the map', async () => {
-            // Use a valid Solana address that's not in the decimals map
-            const unknownMint = '2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo';
-
-            // @ts-ignore - Accessing private property for testing
-            const mockGet = provider.client.get as jest.Mock;
-            mockGet.mockResolvedValueOnce(mockResponse);
-
-            const result = await provider.getTokenMetadata(unknownMint);
-
-            expect(result.decimals).toBe(0); // Default value
-        });
-
         it('should throw error when token data is not available', async () => {
             // @ts-ignore - Accessing private property for testing
             const mockGet = provider.client.get as jest.Mock;
             mockGet.mockResolvedValueOnce(null);
 
             await expect(provider.getTokenMetadata(validMint)).rejects.toThrow('Token data not available');
-        });
-
-        it('should throw error when both direct lookup and mapping fail', async () => {
-            const unknownMint = 'So11111111111111111111111111111111111111113'; // Unknown mint
-
-            // @ts-ignore - Accessing private property for testing
-            const mockGet = provider.client.get as jest.Mock;
-            mockGet.mockRejectedValueOnce(new Error('Not found'));
-
-            await expect(provider.getTokenMetadata(unknownMint)).rejects.toThrow(
-                `Token data not available for ${unknownMint}: Not found`
-            );
         });
     });
 }); 
