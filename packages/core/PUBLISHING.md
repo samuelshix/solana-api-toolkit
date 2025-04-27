@@ -1,6 +1,6 @@
-# Publishing @solana-api-toolkit/token-service to npm
+# Publishing @solana-api-toolkit/core to npm
 
-This guide explains how to publish the token-service package to npm.
+This guide explains how to publish the core package to npm.
 
 ## Prerequisites
 
@@ -16,9 +16,9 @@ This guide explains how to publish the token-service package to npm.
 
 ```json
 {
-  "name": "@solana-api-toolkit/token-service",
+  "name": "@solana-api-toolkit/core",
   "version": "0.1.0",
-  "description": "Token data service with multiple provider support for Solana API Toolkit",
+  "description": "Core utilities and interfaces for Solana API Toolkit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -28,22 +28,16 @@ This guide explains how to publish the token-service package to npm.
   ],
   "publishConfig": {
     "access": "public"
-  },
-  // ... other fields
+  }
 }
 ```
 
-2. Make sure the dependencies are correctly specified:
-   ```json
-   "@solana-api-toolkit/core": "^0.1.0", // Use the actual published version
-   ```
-
-3. Build the package:
+2. Build the package:
 ```bash
 npm run build
 ```
 
-4. Test the package locally (optional):
+3. Test the package locally (optional):
 ```bash
 npm pack
 ```
@@ -86,14 +80,13 @@ If you're working in a monorepo (which appears to be the case), you might want t
   "private": true,
   "workspaces": [
     "packages/*"
-  ],
-  // ... other fields
+  ]
 }
 ```
 
 2. To publish a single package from the workspace:
 ```bash
-cd packages/token-service
+cd packages/core
 npm publish --access public
 ```
 
@@ -115,7 +108,7 @@ lerna init
 lerna publish
 
 # Publish a specific package
-lerna publish --scope=@solana-api-toolkit/token-service
+lerna publish --scope=@solana-api-toolkit/core
 ```
 
 ## After Publishing
@@ -135,4 +128,4 @@ git push origin v0.1.0
 - **"You must be logged in to publish packages"**: Run `npm login` and try again.
 - **"You do not have permission to publish"**: Check if you have the right permissions for the scope or consider using your own scope.
 - **"Package name already exists"**: Choose a different package name or scope.
-- **"Version already exists"**: Update the version number in package.json. 
+- **"Version already exists"**: Update the version number in package.json.

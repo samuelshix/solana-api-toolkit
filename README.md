@@ -14,8 +14,9 @@ A comprehensive toolkit for interacting with Solana ecosystem APIs, providing st
 
 | Package | Description |
 |---------|-------------|
-| `@solana-api-toolkit/token-data-service` | Combined service for token data from multiple sources |
-| `@solana-api-toolkit/core` | Shared utilities and types |
+| [`@solana-api-toolkit/token-data-service`](https://github.com/samuelshix/solana-api-toolkit/tree/master/packages/token-service) | Combined service for token data from multiple sources |
+| [`@solana-api-toolkit/core`](https://github.com/samuelshix/solana-api-toolkit/tree/master/packages/core) | Shared utilities and types |
+
 
 ## Included API clients (api keys not included)
 - Helius DAS API

@@ -5,6 +5,8 @@ A powerful and flexible token data service for Solana with multi-provider suppor
 [![npm version](https://img.shields.io/npm/v/@solana-api-toolkit/token-service.svg)](https://www.npmjs.com/package/@solana-api-toolkit/token-service)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+**Note: This is not fully tested and is still under development. Use at your own risk. Please open a github issue or PR if you run into issues or have feature requests!**
+
 ## Features
 
 - **Multi-Provider Support**: Seamlessly integrates with multiple token data providers including Helius, Jupiter, Birdeye, Solscan, CoinMarketCap, CoinGecko, and Pyth
@@ -103,7 +105,7 @@ The `TokenServiceConfig` interface supports the following providers:
 - `solscan`: Solscan provider configuration
 - `coinmarketcap`: CoinMarketCap provider configuration
 - `coingecko`: CoinGecko provider configuration
-- `pyth`: Pyth provider configuration
+- `pyth`: Pyth provider configuration (not yet implemented)
 
 Each provider configuration accepts:
 
