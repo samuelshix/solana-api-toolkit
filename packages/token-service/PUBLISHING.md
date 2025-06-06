@@ -12,24 +12,13 @@ This guide explains how to publish the token-service package to npm.
 
 ## Preparing the Package
 
-1. Update the package.json file:
+1. Update the proposed version number in the package.json file of the package you are updating:
 
 ```json
 {
   "name": "@solana-api-toolkit/token-service",
-  "version": "0.1.0",
-  "description": "Token data service with multiple provider support for Solana API Toolkit",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  // ... other fields
+  "version": "{VERSION_HERE}",
+  ...
 }
 ```
 
