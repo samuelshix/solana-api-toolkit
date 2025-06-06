@@ -31,10 +31,13 @@ class CoinMarketCapClient extends HttpClient {
         //     });
         // }
 
-        return this.get<any>(`/cryptocurrency/quotes/latest`, {
-            symbol: symbol
-        }, {
-            'X-CMC_PRO_API_KEY': this.config.apiKey
+        return this.request<any>('GET', `/cryptocurrency/quotes/latest`, {
+            headers: {
+                'X-CMC_PRO_API_KEY': this.config.apiKey
+            },
+            params: {
+                symbol: symbol
+            }
         });
     }
 }

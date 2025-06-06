@@ -23,8 +23,10 @@ class BirdeyeClient extends HttpClient {
      * Get token price Birdeye API call
      */
     async getPrice(mint: string): Promise<any> {
-        return this.get<any>(`/defi/price?address=${mint}`, undefined, {
-            'X-API-KEY': this.config.apiKey
+        return this.request<any>('GET', `/defi/price?address=${mint}`, {
+            headers: {
+                'X-API-KEY': this.config.apiKey
+            }
         });
     }
 
@@ -33,8 +35,10 @@ class BirdeyeClient extends HttpClient {
      */
     async getPrices(contractAddresses: string[]): Promise<any> {
         const addressesParam = contractAddresses.join(',');
-        return this.get<any>(`/defi/multi_price?list_address=${addressesParam}`, undefined, {
-            'X-API-KEY': this.config.apiKey
+        return this.request<any>('GET', `/defi/multi_price?list_address=${addressesParam}`, {
+            headers: {
+                'X-API-KEY': this.config.apiKey
+            }
         });
     }
 
@@ -42,8 +46,10 @@ class BirdeyeClient extends HttpClient {
      * Get token metadata Birdeye API call
      */
     async getTokenInfo(mint: string): Promise<any> {
-        return this.get<any>(`/public/token_list/detail?address=${mint}`, undefined, {
-            'X-API-KEY': this.config.apiKey
+        return this.request<any>('GET', `/public/token_list/detail?address=${mint}`, {
+            headers: {
+                'X-API-KEY': this.config.apiKey
+            }
         });
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@solana-api-toolkit/token-service",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "description": "Token data service with multiple provider support for Solana API Toolkit",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

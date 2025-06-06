@@ -25,11 +25,25 @@ class JupiterClient extends HttpClient {
      */
     async getPrice(mint: string): Promise<any> {
         if (this.config.apiKey) {
-            return this.get<any>(`/price/v2?ids=${mint}`, undefined, {
-                'x-api-key': this.config.apiKey
+            return this.request<any>('GET', `/price/v2?ids=${mint}`, {
+                headers: {
+                    'x-api-key': this.config.apiKey
+                }
             });
         } else {
             return this.get<any>(`/price/v2?ids=${mint}`);
+        }
+    }
+
+    async getTokenPrices(mints: string[]): Promise<any> {
+        if (this.config.apiKey) {
+            return this.request<any>('GET', `/price/v2?ids=${mints.join(',')}`, {
+                headers: {
+                    'x-api-key': this.config.apiKey
+                }
+            });
+        } else {
+            return this.get<any>(`/price/v2?ids=${mints.join(',')}`);
         }
     }
 

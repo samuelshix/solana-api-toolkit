@@ -141,10 +141,10 @@ export class HttpClient {
     /**
      * Make a GET request with additional headers
      */
-    protected get<T>(endpoint: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<T> {
+    protected get<T>(endpoint: string, params?: Record<string, any>, options?: AxiosRequestConfig): Promise<T> {
         return this.request<T>('GET', endpoint, {
             params,
-            headers: headers ? { ...headers } : undefined
+            ...options
         });
     }
 }

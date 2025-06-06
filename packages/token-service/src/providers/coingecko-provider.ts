@@ -26,8 +26,10 @@ class CoinGeckoClient extends HttpClient {
      */
     async getTokenPrice(contractAddress: string): Promise<any> {
         try {
-            return this.get<any>(`/coins/solana/contract/${contractAddress}`, undefined, {
-                'x-cg-pro-api-key': this.config.apiKey
+            return this.request<any>('GET', `/coins/solana/contract/${contractAddress}`, {
+                headers: {
+                    'x-cg-pro-api-key': this.config.apiKey
+                }
             });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
@@ -41,10 +43,15 @@ class CoinGeckoClient extends HttpClient {
     async getTokenPrices(contractAddresses: string[]): Promise<any> {
         try {
             const addressesParam = contractAddresses.join(',');
-            return this.get<any>(`/simple/token_price/solana`, {
-                contract_addresses: addressesParam,
-                vs_currencies: 'usd'
-            }, { 'x-cg-pro-api-key': this.config.apiKey });
+            return this.request<any>('GET', `/simple/token_price/solana`, {
+                headers: {
+                    'x-cg-pro-api-key': this.config.apiKey
+                },
+                params: {
+                    contract_addresses: addressesParam,
+                    vs_currencies: 'usd'
+                }
+            });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             throw new Error(`Failed to get token prices: ${errorMessage}`);
@@ -56,8 +63,10 @@ class CoinGeckoClient extends HttpClient {
      */
     async getCoinById(coinId: string): Promise<any> {
         try {
-            return this.get<any>(`/coins/${coinId}`, undefined, {
-                'x-cg-pro-api-key': this.config.apiKey
+            return this.request<any>('GET', `/coins/${coinId}`, {
+                headers: {
+                    'x-cg-pro-api-key': this.config.apiKey
+                }
             });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);

@@ -63,6 +63,8 @@ export interface TokenDataProvider {
     readonly priority: number;
     /** Get token price */
     getTokenPrice(mint: string): Promise<TokenPrice>;
+    /** Get token prices */
+    getTokenPrices?(mints: string[]): Promise<TokenPrice[]>;
     /** Get token metadata */
     getTokenMetadata(mint: string): Promise<TokenInfo>;
     /** Get token balances for a wallet */

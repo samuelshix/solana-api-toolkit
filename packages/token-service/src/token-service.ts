@@ -86,6 +86,16 @@ export class TokenService {
         }
     }
 
+    async getTokenPrices(mints: string[]): Promise<TokenPrice[]> {
+        for (const provider of this.providers) {
+            if (!provider.getTokenPrices) continue;
+            const prices = await provider.getTokenPrices(mints);
+            return prices;
+        }
+        throw new Error('No token price providers configured');
+        
+    }
+
     /**
      * Get token price with automatic fallback between providers
      */
